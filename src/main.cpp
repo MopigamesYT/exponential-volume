@@ -18,34 +18,12 @@ static float applyExponentialCurve(float linear) {
     return std::pow(linear, exponent);
 }
 
-// Recursively find all Slider instances in a node tree
-static void findSliders(CCNode* node, std::vector<Slider*>& out) {
-    if (!node) return;
-    if (auto* slider = typeinfo_cast<Slider*>(node)) {
-        out.push_back(slider);
-    }
-    if (auto* children = node->getChildren()) {
-        for (int i = 0; i < children->count(); i++) {
-            findSliders(static_cast<CCNode*>(children->objectAtIndex(i)), out);
+static void replaceSliderCallback(CCNode* layer, const char* id,
+    CCObject* target, cocos2d::SEL_MenuHandler cb) {
+    if (auto* slider = typeinfo_cast<Slider*>(layer->getChildByIDRecursive(id))) {
+        if (auto* thumb = slider->getThumb()) {
+            thumb->setTarget(target, cb);
         }
-    }
-}
-
-static void replaceSliderCallbacks(CCNode* layer, CCObject* target,
-    cocos2d::SEL_MenuHandler musicCb, cocos2d::SEL_MenuHandler sfxCb) {
-    std::vector<Slider*> sliders;
-    findSliders(layer, sliders);
-
-    int idx = 0;
-    for (auto* slider : sliders) {
-        auto* thumb = slider->getThumb();
-        if (!thumb) continue;
-        if (idx == 0) {
-            thumb->setTarget(target, musicCb);
-        } else if (idx == 1) {
-            thumb->setTarget(target, sfxCb);
-        }
-        idx++;
     }
 }
 
@@ -77,7 +55,6 @@ static void handleSfxSlider(SliderThumb* thumb) {
     s_lastCurved = curved;
 }
 
-// Log on slider release
 class $modify(SliderTouchLogic) {
     void ccTouchEnded(cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
         SliderTouchLogic::ccTouchEnded(touch, event);
@@ -95,11 +72,10 @@ class $modify(SliderTouchLogic) {
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
-        replaceSliderCallbacks(
-            this, this,
-            menu_selector(MyPauseLayer::onMusicSlider),
-            menu_selector(MyPauseLayer::onSfxSlider)
-        );
+        replaceSliderCallback(this, "music-slider",
+            this, menu_selector(MyPauseLayer::onMusicSlider));
+        replaceSliderCallback(this, "sfx-slider",
+            this, menu_selector(MyPauseLayer::onSfxSlider));
     }
 
     void onMusicSlider(CCObject* sender) {
@@ -114,11 +90,10 @@ class $modify(MyPauseLayer, PauseLayer) {
 class $modify(MyOptionsLayer, OptionsLayer) {
     void customSetup() {
         OptionsLayer::customSetup();
-        replaceSliderCallbacks(
-            this, this,
-            menu_selector(MyOptionsLayer::onMusicSlider),
-            menu_selector(MyOptionsLayer::onSfxSlider)
-        );
+        replaceSliderCallback(this, "music-slider",
+            this, menu_selector(MyOptionsLayer::onMusicSlider));
+        replaceSliderCallback(this, "sfx-slider",
+            this, menu_selector(MyOptionsLayer::onSfxSlider));
     }
 
     void onMusicSlider(CCObject* sender) {
