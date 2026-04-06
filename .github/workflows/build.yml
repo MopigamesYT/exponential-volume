@@ -13,16 +13,25 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { name: Windows, os: ubuntu-latest, target: Win64 }
+          - { name: Windows, os: ubuntu-24.04, target: Win64 }
           - { name: macOS, os: macos-latest, target: MacOS }
-          - { name: Android32, os: ubuntu-latest, target: Android32 }
-          - { name: Android64, os: ubuntu-latest, target: Android64 }
+          - { name: Android32, os: ubuntu-24.04, target: Android32 }
+          - { name: Android64, os: ubuntu-24.04, target: Android64 }
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install LLVM 19
+        if: matrix.config.target == 'Win64'
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 200
 
       - name: Build mod
         uses: geode-sdk/build-geode-mod@main
