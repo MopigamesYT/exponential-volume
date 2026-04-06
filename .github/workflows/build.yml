@@ -27,13 +27,13 @@ jobs:
       - name: Install LLVM 19
         if: matrix.config.target == 'Win64'
         run: |
-          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
-          sudo ln -sf /usr/bin/clang-19 /usr/bin/clang
-          sudo ln -sf /usr/bin/clang++-19 /usr/bin/clang++
-          sudo ln -sf /usr/bin/lld-19 /usr/bin/lld
-          sudo ln -sf /usr/bin/lld-link-19 /usr/bin/lld-link
-          sudo ln -sf /usr/bin/llvm-rc-19 /usr/bin/llvm-rc
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19 all
+          for tool in /usr/bin/*-19; do
+            base=$(basename "$tool" -19)
+            sudo ln -sf "$tool" "/usr/bin/$base"
+          done
           clang --version
+          clang-cl --version
 
       - name: Build mod
         uses: geode-sdk/build-geode-mod@main
