@@ -13,10 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { name: Windows, os: ubuntu-latest, platform: win }
-          - { name: macOS, os: macos-latest, platform: mac }
-          - { name: Android32, os: ubuntu-latest, platform: android32 }
-          - { name: Android64, os: ubuntu-latest, platform: android64 }
+          - { name: Windows, os: ubuntu-latest, target: win }
+          - { name: macOS, os: macos-latest, target: mac }
+          - { name: Android32, os: ubuntu-latest, target: android32 }
+          - { name: Android64, os: ubuntu-latest, target: android64 }
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -27,7 +27,7 @@ jobs:
       - name: Build mod
         uses: geode-sdk/build-geode-mod@main
         with:
-          platform: ${{ matrix.config.platform }}
+          target: ${{ matrix.config.target }}
           combine: true
 
   package:

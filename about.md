@@ -11,3 +11,4 @@ An exponential curve spreads the perceptible range evenly across the slider, giv
 ## Settings
 
 - **Exponent** (1.0 - 5.0, default 3.0): Controls the curve steepness. Set to 1.0 for vanilla linear behavior.
+- **Enable Logging**: Log volume changes to the Geode console for debugging.
