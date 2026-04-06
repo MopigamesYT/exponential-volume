@@ -9,7 +9,7 @@
     "id": "mopi.exponential-volume",
     "name": "Exponential Volume",
     "version": "v1.0.0",
-    "developer": "MopiGames",
+    "developer": "Mopigames",
     "description": "Makes the Music and SFX volume sliders exponential instead of linear, giving much more control at low volumes.",
     "tags": ["enhancement", "music", "customization"],
     "settings": {
