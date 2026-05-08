@@ -1,4 +1,5 @@
 #include <Geode/Geode.hpp>
+#include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/OptionsLayer.hpp>
 
@@ -10,6 +11,25 @@ static float applyExponentialCurve(float linear) {
 
     float exponent = Mod::get()->getSettingValue<double>("exponent");
     return std::pow(linear, exponent);
+}
+
+static void applyVolumes() {
+    auto* gm = GameManager::get();
+    auto* engine = FMODAudioEngine::sharedEngine();
+
+    float musicCurved = applyExponentialCurve(gm->m_bgVolume);
+    float sfxCurved   = applyExponentialCurve(gm->m_sfxVolume);
+
+    engine->setBackgroundMusicVolume(musicCurved);
+    engine->setEffectsVolume(sfxCurved);
+
+    engine->m_musicVolume = gm->m_bgVolume;
+    engine->m_sfxVolume   = gm->m_sfxVolume;
+
+    if (Mod::get()->getSettingValue<bool>("logging")) {
+        log::info("Startup: Music {:.1f}% -> {:.1f}%", gm->m_bgVolume * 100.f, musicCurved * 100.f);
+        log::info("Startup: SFX   {:.1f}% -> {:.1f}%", gm->m_sfxVolume * 100.f, sfxCurved * 100.f);
+    }
 }
 
 static void replaceSliderCallback(CCNode* layer, const char* id,
@@ -48,6 +68,14 @@ static void handleSfxSlider(SliderThumb* thumb) {
     engine->setEffectsVolume(curved);
     engine->m_sfxVolume = linear;
 }
+
+class $modify(MyMenuLayer, MenuLayer) {
+    bool init() {
+        if (!MenuLayer::init()) return false;
+        applyVolumes();
+        return true;
+    }
+};
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
